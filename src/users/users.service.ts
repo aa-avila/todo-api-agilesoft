@@ -16,6 +16,11 @@ export class UsersService {
     private authService: AuthService,
   ) {}
 
+  async sessionData(req): Promise<any> {
+    const token = req.headers['authorization'].replace('Bearer ', '');
+    return await this.authService.verifyJwt(token);
+  }
+
   async create(createdUserDto: CreateUserDto): Promise<UserI> {
     const userExists = await this.usernameExists(createdUserDto.username);
     if (userExists) {
