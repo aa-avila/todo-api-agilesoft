@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
 
-@Controller('auth')
-export class AuthController {
+@Controller('users')
+export class UsersController {
   @Post('/register')
   register(
     @Body('username') username: string,
