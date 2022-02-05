@@ -1,9 +1,11 @@
+import { User } from 'src/users/user.entity';
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
 
 @Entity()
@@ -25,4 +27,7 @@ export class Task {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @ManyToOne(() => User, (user: User) => user.tasks)
+  public user: User;
 }
