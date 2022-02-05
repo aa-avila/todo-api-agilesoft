@@ -7,42 +7,49 @@ import {
   Body,
   Param,
 } from '@nestjs/common';
+import { TasksService } from './tasks.service';
 
 @Controller('tasks')
 export class TasksController {
+  constructor(private tasksService: TasksService) {}
+
   @Get()
-  getAll() {
-    return [1, 2, 3];
+  async getAll() {
+    return this.tasksService.findAll();
   }
 
   @Get(':id')
-  getOne(@Param('id') taskId: number, @Body('userId') userId: number) {
-    return { userId, taskId };
+  async getOne(@Param('id') id: number, @Body('userId') userId: number) {
+    // return { userId, taskId };
+    return await this.tasksService.findOne(id, userId);
   }
 
   @Post()
-  create(
+  async create(
     @Body('userId') userId: number,
-    @Body('name') taskName: string,
-    @Body('description') taskDesc: string,
-    @Body('completed') taskComp: boolean,
+    @Body('name') name: string,
+    @Body('description') description: string,
   ) {
-    return { userId, taskId: 123, taskName, taskDesc, taskComp };
+    return await this.tasksService.create(userId, { name, description });
   }
 
   @Patch(':id')
-  update(
-    @Param('id') taskId: number,
+  async update(
+    @Param('id') id: number,
     @Body('userId') userId: number,
-    @Body('name') taskName: string,
-    @Body('description') taskDesc: string,
-    @Body('completed') taskComp: boolean,
+    @Body('name') name: string,
+    @Body('description') description: string,
+    @Body('completed') completed: boolean,
   ) {
-    return { userId, taskId, taskName, taskDesc, taskComp };
+    return await this.tasksService.update(id, userId, {
+      name,
+      description,
+      completed,
+    });
   }
 
   @Delete(':id')
-  delete(@Param('id') taskId: number, @Body('userId') userId: number) {
-    return { userId, taskId };
+  async delete(@Param('id') id: number, @Body('userId') userId: number) {
+    return await this.tasksService.delete(id, userId);
   }
 }
