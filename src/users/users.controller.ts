@@ -3,6 +3,7 @@ import { UserI } from './user.interface';
 import { CreateUserDto } from './dto/CreateUser.dto';
 import { UsersService } from './users.service';
 import { LoginUserDto } from './dto/LoginUser.dto';
+import { LoginUserResponseDto } from './dto/LoginUserResponse.dto';
 
 @Controller('users')
 export class UsersController {
@@ -15,7 +16,9 @@ export class UsersController {
 
   @Post('/login')
   @HttpCode(200)
-  async login(@Body() LoginUserDto: LoginUserDto): Promise<string> {
+  async login(
+    @Body() LoginUserDto: LoginUserDto,
+  ): Promise<LoginUserResponseDto> {
     return await this.usersService.login(LoginUserDto);
   }
 

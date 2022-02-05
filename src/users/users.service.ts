@@ -6,6 +6,7 @@ import { CreateUserDto } from './dto/CreateUser.dto';
 import { LoginUserDto } from './dto/LoginUser.dto';
 import { User } from './user.entity';
 import { UserI } from './user.interface';
+import { LoginUserResponseDto } from './dto/LoginUserResponse.dto';
 
 @Injectable()
 export class UsersService {
@@ -30,7 +31,7 @@ export class UsersService {
     return savedUser;
   }
 
-  async login(loginUserDto: LoginUserDto): Promise<string> {
+  async login(loginUserDto: LoginUserDto): Promise<LoginUserResponseDto> {
     const user = await this.findByUsername(loginUserDto.username);
     if (!user) {
       throw new HttpException('Username not found', HttpStatus.NOT_FOUND);
@@ -44,7 +45,18 @@ export class UsersService {
       throw new HttpException('Incorrect password', HttpStatus.UNAUTHORIZED);
     }
 
-    return 'Login OK';
+    const userPayload = {
+      userId: user.id,
+      username: user.username,
+    };
+
+    const jwtToken = await this.authService.generateJwt(userPayload);
+    return {
+      access_token: jwtToken,
+      token_type: 'JWT',
+      expires_in: 10000,
+      user_id: user.id,
+    };
   }
 
   private async findByUsername(username: string): Promise<UserI> {
