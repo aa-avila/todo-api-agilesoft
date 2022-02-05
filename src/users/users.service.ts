@@ -1,36 +1,73 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AuthService } from 'src/auth/auth.service';
 import { Repository } from 'typeorm';
+import { CreateUserDto } from './dto/CreateUser.dto';
+import { LoginUserDto } from './dto/LoginUser.dto';
 import { User } from './user.entity';
+import { UserI } from './user.interface';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User) private usersRepository: Repository<User>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
+    private authService: AuthService,
   ) {}
 
-  async findAll() {
-    return await this.usersRepository.find();
+  async create(createdUserDto: CreateUserDto): Promise<UserI> {
+    const userExists = await this.usernameExists(createdUserDto.username);
+    if (userExists) {
+      throw new HttpException('Username already exists', HttpStatus.CONFLICT);
+    }
+
+    const passwordHash = await this.authService.hashPassword(
+      createdUserDto.password,
+    );
+    createdUserDto.password = passwordHash;
+    const newUser = this.usersRepository.create(createdUserDto);
+    const { password, ...savedUser } = await this.usersRepository.save(newUser);
+    return savedUser;
   }
 
-  async findById(id: number) {
-    return await this.usersRepository.findOne(id);
+  async login(loginUserDto: LoginUserDto): Promise<string> {
+    const user = await this.findByUsername(loginUserDto.username);
+    if (!user) {
+      throw new HttpException('Username not found', HttpStatus.NOT_FOUND);
+    }
+
+    const passMatch = await this.validatePassword(
+      loginUserDto.password,
+      user.password,
+    );
+    if (!passMatch) {
+      throw new HttpException('Incorrect password', HttpStatus.UNAUTHORIZED);
+    }
+
+    return 'Login OK';
   }
 
-  async findByUsername(username: string) {
-    return await this.usersRepository.findOne({
-      where: { username: username },
-    });
+  private async findByUsername(username: string): Promise<UserI> {
+    return await this.usersRepository.findOne(
+      { username },
+      { select: ['id', 'username', 'password'] },
+    );
   }
 
-  async create(data: any) {
-    const newUser = this.usersRepository.create(data);
-    return await this.usersRepository.save(newUser);
+  private async usernameExists(username: string): Promise<boolean> {
+    const user: UserI = await this.usersRepository.findOne({ username });
+
+    if (user) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
-  async update(id: number, data: any) {
-    const user = await this.usersRepository.findOne(id);
-    this.usersRepository.merge(user, data);
-    return await this.usersRepository.save(user);
+  private async validatePassword(
+    password: string,
+    dbPassword: string,
+  ): Promise<boolean> {
+    return await this.authService.comparePasswords(password, dbPassword);
   }
 }
