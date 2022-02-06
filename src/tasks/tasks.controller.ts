@@ -10,6 +10,9 @@ import {
   Req,
   HttpStatus,
 } from '@nestjs/common';
+import { TaskI } from './task.interface';
+import { CreateTaskDto } from './dto/CreateTask.dto';
+import { UpdateTaskDto } from './dto/UpdateTask.dto';
 import { TasksService } from './tasks.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
@@ -25,7 +28,7 @@ export class TasksController {
   }
 
   @Get(':id')
-  async getOne(@Param('id') id: number, @Req() request): Promise<any> {
+  async getOne(@Param('id') id: number, @Req() request): Promise<TaskI> {
     const { userId } = request.user;
     return await this.tasksService.findOne(id, userId);
   }
@@ -33,31 +36,24 @@ export class TasksController {
   @Post()
   async create(
     @Req() request,
-    @Body('name') name: string,
-    @Body('description') description: string,
-  ) {
+    @Body() createTaskDto: CreateTaskDto,
+  ): Promise<TaskI> {
     const { userId } = request.user;
-    return await this.tasksService.create(userId, { name, description });
+    return await this.tasksService.create(userId, createTaskDto);
   }
 
   @Patch(':id')
   async update(
     @Req() request,
     @Param('id') id: number,
-    @Body('name') name: string,
-    @Body('description') description: string,
-    @Body('completed') completed: boolean,
-  ) {
+    @Body() updateTaskDto: UpdateTaskDto,
+  ): Promise<TaskI> {
     const { userId } = request.user;
-    return await this.tasksService.update(id, userId, {
-      name,
-      description,
-      completed,
-    });
+    return await this.tasksService.update(id, userId, updateTaskDto);
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: number, @Req() request) {
+  async delete(@Param('id') id: number, @Req() request): Promise<any> {
     const { userId } = request.user;
     const response = await this.tasksService.delete(id, userId);
     return {
