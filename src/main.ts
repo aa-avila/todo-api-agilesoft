@@ -8,10 +8,9 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   const options = new DocumentBuilder()
-    .setTitle('TODO - AgileSoft')
-    .setDescription('TODO API - NestJS/TypeORM/PostreSQL')
+    .setTitle('TODO API - AgileSoft')
+    .setDescription('Challenge TODO API - NestJS / TypeORM / PostgreSQL')
     .setVersion('1.0')
-    // .addTag('cats')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);
