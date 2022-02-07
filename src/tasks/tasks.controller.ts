@@ -10,29 +10,77 @@ import {
   Req,
   HttpStatus,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiBody,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { Task } from './task.entity';
 import { TaskI } from './task.interface';
 import { CreateTaskDto } from './dto/CreateTask.dto';
 import { UpdateTaskDto } from './dto/UpdateTask.dto';
 import { TasksService } from './tasks.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
+@ApiBearerAuth()
+@ApiTags('Tasks')
 @UseGuards(JwtAuthGuard)
 @Controller('tasks')
 export class TasksController {
   constructor(private tasksService: TasksService) {}
 
+  @ApiOperation({ summary: 'Get all tasks' })
+  @ApiResponse({
+    status: 200,
+    description: 'OK',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
   @Get()
   async getAll(@Req() request): Promise<any> {
     const { userId } = request.user;
     return await this.tasksService.findAll(userId);
   }
 
+  @ApiOperation({ summary: 'Get one task' })
+  @ApiResponse({
+    status: 200,
+    type: Task,
+    description: 'OK',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Task not found',
+  })
   @Get(':id')
   async getOne(@Param('id') id: number, @Req() request): Promise<TaskI> {
     const { userId } = request.user;
     return await this.tasksService.findOne(id, userId);
   }
 
+  @ApiOperation({ summary: 'Create task' })
+  @ApiBody({ type: CreateTaskDto })
+  @ApiResponse({
+    status: 201,
+    type: Task,
+    description: 'Task created',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+  })
   @Post()
   async create(
     @Req() request,
@@ -42,6 +90,25 @@ export class TasksController {
     return await this.tasksService.create(userId, createTaskDto);
   }
 
+  @ApiOperation({ summary: 'Update task' })
+  @ApiBody({ type: UpdateTaskDto })
+  @ApiResponse({
+    status: 200,
+    type: Task,
+    description: 'Task updated',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Task not found',
+  })
   @Patch(':id')
   async update(
     @Req() request,
@@ -52,6 +119,19 @@ export class TasksController {
     return await this.tasksService.update(id, userId, updateTaskDto);
   }
 
+  @ApiOperation({ summary: 'Delete one Task' })
+  @ApiResponse({
+    status: 200,
+    description: 'Task deleted',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Task not found',
+  })
   @Delete(':id')
   async delete(@Param('id') id: number, @Req() request): Promise<any> {
     const { userId } = request.user;
