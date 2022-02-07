@@ -36,6 +36,10 @@ export class TasksController {
     status: 200,
     description: 'OK',
   })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
   @Get()
   async getAll(@Req() request): Promise<any> {
     const { userId } = request.user;
@@ -48,6 +52,14 @@ export class TasksController {
     type: Task,
     description: 'OK',
   })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Task not found',
+  })
   @Get(':id')
   async getOne(@Param('id') id: number, @Req() request): Promise<TaskI> {
     const { userId } = request.user;
@@ -57,9 +69,17 @@ export class TasksController {
   @ApiOperation({ summary: 'Create task' })
   @ApiBody({ type: CreateTaskDto })
   @ApiResponse({
-    status: 200,
+    status: 201,
     type: Task,
     description: 'Task created',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
   })
   @Post()
   async create(
@@ -77,6 +97,18 @@ export class TasksController {
     type: Task,
     description: 'Task updated',
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Task not found',
+  })
   @Patch(':id')
   async update(
     @Req() request,
@@ -91,6 +123,14 @@ export class TasksController {
   @ApiResponse({
     status: 200,
     description: 'Task deleted',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Task not found',
   })
   @Delete(':id')
   async delete(@Param('id') id: number, @Req() request): Promise<any> {

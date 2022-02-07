@@ -34,6 +34,14 @@ export class UsersController {
     type: LoginUserResponseDto,
     description: 'User created',
   })
+  @ApiResponse({
+    status: 409,
+    description: 'Username already exists',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+  })
   @Post('/register')
   async create(@Body() createdUserDto: CreateUserDto): Promise<UserI> {
     return await this.usersService.create(createdUserDto);
@@ -45,6 +53,18 @@ export class UsersController {
     status: 200,
     type: LoginUserResponseDto,
     description: 'Logged in successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Incorrect password',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Username not found',
   })
   @Post('/login')
   @HttpCode(200)
@@ -60,6 +80,10 @@ export class UsersController {
     status: 200,
     type: MeUserResponseDto,
     description: 'User info',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
   })
   @UseGuards(JwtAuthGuard)
   @Get('/me')
